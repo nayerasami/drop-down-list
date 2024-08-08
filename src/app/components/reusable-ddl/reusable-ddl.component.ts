@@ -7,7 +7,7 @@ import { IddlOptions } from 'src/app/Models/iddl-options';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent  {
-  selectedValues: Set<string> = new Set();
+  selectedValues: string[] = [];
   selectedVal: string = ''
 
   @Input() options: any[] = [];
@@ -30,8 +30,10 @@ export class ReusableDdlComponent  {
   isSelected(option: string): boolean {
     if (!this.ddlconfigOptions.isMultiValued) {
       return this.selectedVal === option
-    } else {
-      return this.selectedValues.has(option);
+    } else {    
+        console.log(this.selectedValues)
+
+      return this.selectedValues.includes(option);
     }
   }
 
@@ -39,13 +41,17 @@ export class ReusableDdlComponent  {
     if (!this.ddlconfigOptions.isMultiValued) {
       this.selectedVal = option;
       this.selectionEvent.emit(this.selectedVal);
+      console.log(this.selectedVal)
     } else {
-      if (this.selectedValues.has(option)) {
-        this.selectedValues.delete(option);
+      if (this.selectedValues.includes(option)) {
+        // this.selectedValues.delete(option);
+        this.selectedValues.splice(-1,0)
+        console.log(this.selectedValues)
+        
       } else {
-        this.selectedValues.add(option);
+        this.selectedValues.push(option);
       }
-      this.selectionEvent.emit(Array.from(this.selectedValues));
+      this.selectionEvent.emit(this.selectedValues);
     }
   }
 
