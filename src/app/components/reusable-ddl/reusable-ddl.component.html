@@ -7,31 +7,33 @@
         (click)="toggleDropdown()"
         aria-expanded="dropdownOpen"
       >
-        {{ selectedValue || "Main Field" }}
+        {{ displaySelectedVals() || "Main Field" }}
       </button>
       <div class="dropdown-menu" [class.show]="dropdownOpen">
         <div class="input-group my-3">
           <input
+            *ngIf="ddlconfigOptions.isSearchabl"
             type="text"
             class="form-control"
             placeholder="Search"
-            aria-label="Amount (to the nearest dollar)"
           />
-          <span class="input-group-text text-success"
+          <span
+            *ngIf="ddlconfigOptions.isResettable"
+            class="input-group-text text-success"
             ><i class="bi bi-arrow-clockwise"></i
           ></span>
         </div>
         <div class="form-check my-2" *ngFor="let option of options">
           <input
             class="form-check-input mt-0"
-            type="radio"
-            [value]="option"
-            [(ngModel)]="selectedValue"
-            [id]="option"
+            [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
+            [value]="option.name"
+            [checked]="isSelected(option.name)"
+            (change)="getSelectedValue(option.name)"
+            [id]="option.id"
+            [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />
-          <label class="form-check-label" for="computerScience">{{
-            option
-          }}</label>
+          <label class="form-check-label" [for]="option.id">{{ option.name }}</label>
         </div>
       </div>
     </div>

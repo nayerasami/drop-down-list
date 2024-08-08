@@ -1,7 +1,21 @@
+<!-- <div class="container">
+  <div class="row">
+    <div class="col-md-6 p-5">
+      <app-drop-down-list></app-drop-down-list>
+    </div>
+    <div class="col-md-6 p-5">
+      <app-multi-select></app-multi-select>
+    </div>
+  </div>
+</div> -->
+
 <div class="container">
   <div class="row">
-    <div class="col-md-6">
-      
-    </div>
+    <app-reusable-ddl
+      [options]="options"
+      [inputType]="inputType"
+      (selectionEvent)="getSelectedData($event)"
+      [ddlconfigOptions]="ddlconfig"
+    ></app-reusable-ddl>
   </div>
 </div>

@@ -7,7 +7,7 @@
         (click)="toggleDropdown()"
         aria-expanded="dropdownOpen"
       >
-        {{ selectedValue || "Main Field" }}
+        {{ getSelectedValues() || "Main Field" }}
       </button>
       <div class="dropdown-menu" [class.show]="dropdownOpen">
         <div class="input-group my-3">
@@ -21,17 +21,18 @@
             ><i class="bi bi-arrow-clockwise"></i
           ></span>
         </div>
-        <div class="form-check my-2" *ngFor="let option of options">
+        <div
+          class="form-check my-2"
+          *ngFor="let option of options; let i = index"
+        >
           <input
-            class="form-check-input mt-0"
-            type="radio"
+            class="form-check-input"
+            type="checkbox"
             [value]="option"
-            [(ngModel)]="selectedValue"
+            [(ngModel)]="selectedValues[option]"
             [id]="option"
           />
-          <label class="form-check-label" for="computerScience">{{
-            option
-          }}</label>
+          <label class="form-check-label" [for]="option">{{ option }}</label>
         </div>
       </div>
     </div>

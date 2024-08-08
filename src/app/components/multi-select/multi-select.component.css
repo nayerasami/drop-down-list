@@ -12,6 +12,7 @@
 .dropdown-toggle {
     width: 100%;
     text-align: start;
+    overflow: hidden;
 
 }
 
