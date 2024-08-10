@@ -7,7 +7,7 @@
         (click)="toggleDropdown()"
         aria-expanded="dropdownOpen"
       >
-        {{ displaySelectedVals() || "Main Field" }}
+        {{ displaySelectedVals() }}
       </button>
       <div class="dropdown-menu" [class.show]="dropdownOpen">
         <div class="input-group my-3">
@@ -28,8 +28,8 @@
             class="form-check-input mt-0"
             [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
             [value]="option.name"
-            [checked]="isSelected(option.name)"
-            (change)="getSelectedValue(option.name)"
+            [checked]="isSelected(option)"
+            (change)="getSelectedValue(option)"
             [id]="option.id"
             [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />

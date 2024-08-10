@@ -6,15 +6,14 @@ import { IddlOptions } from 'src/app/Models/iddl-options';
   templateUrl: './reusable-ddl.component.html',
   styleUrls: ['./reusable-ddl.component.css']
 })
-export class ReusableDdlComponent  {
-  selectedValues: string[] = [];
-  selectedVal: string = ''
+export class ReusableDdlComponent {
+  selectedValues: {id:number,name:string}[] = [];
 
   @Input() options: any[] = [];
   @Input() inputType: string = '';
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
-    items:[]
+    items: []
   };
 
   @Output() selectionEvent = new EventEmitter()
@@ -27,45 +26,38 @@ export class ReusableDdlComponent  {
   }
 
 
-  isSelected(option: string): boolean {
+  isSelected(option: { id: number, name: string }): boolean {
     if (!this.ddlconfigOptions.isMultiValued) {
-      return this.selectedVal === option
-    } else {    
-        console.log(this.selectedValues)
+      return this.selectedValues.includes(option)
+    } else {
+      console.log(this.selectedValues)
 
       return this.selectedValues.includes(option);
     }
   }
 
-  getSelectedValue(option: string) {
-    if (!this.ddlconfigOptions.isMultiValued) {
-      this.selectedVal = option;
-      this.selectionEvent.emit(this.selectedVal);
-      console.log(this.selectedVal)
+  getSelectedValue(option: { id: number, name: string }) {
+    const optionIndex = this.selectedValues.indexOf(option);
+
+    if (optionIndex > -1) {
+      this.selectedValues.splice(optionIndex, 1);
     } else {
-      if (this.selectedValues.includes(option)) {
-        // this.selectedValues.delete(option);
-        this.selectedValues.splice(-1,0)
-        console.log(this.selectedValues)
-        
+      if (!this.ddlconfigOptions.isMultiValued) {
+        this.selectedValues = [option];
       } else {
         this.selectedValues.push(option);
       }
-      this.selectionEvent.emit(this.selectedValues);
     }
+
+    this.selectionEvent.emit(this.selectedValues);
+    console.log(this.selectedValues)
   }
 
 
   displaySelectedVals() {
 
-    if (!this.ddlconfigOptions.isMultiValued) {
-      return this.selectedVal || ''
-    } else {
-      return Array.from(this.selectedValues).join(', ');
-    }
-
-
-
+    console.log("display selected vals",this.selectedValues)
+    return this.selectedValues.map(value => value.name).join(', ') || 'Main Field';
   }
 
 

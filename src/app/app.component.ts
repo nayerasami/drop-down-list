@@ -17,7 +17,7 @@ export class AppComponent {
   ]
 
   ddlconfig :IddlOptions ={
-    isMultiValued:true,
+    isMultiValued:false,
     isResettable:true,
     isSearchabl:true,
     items:this.options
