@@ -6,9 +6,9 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
   templateUrl: './reusable-ddl.component.html',
   styleUrls: ['./reusable-ddl.component.css']
 })
-export class ReusableDdlComponent {
+export class ReusableDdlComponent implements OnInit {
   selectedValues: { id: number, name: string }[] = [];
-
+  searchQuery = ''
   @Input() options: Iitems[] = [];
   @Input() inputType: string = '';
   @Input() ddlconfigOptions: IddlOptions = {
@@ -18,7 +18,10 @@ export class ReusableDdlComponent {
 
   @Output() selectionEvent = new EventEmitter()
 
-
+  ngOnInit(): void {
+    this.originalOptions = [...this.options]
+  }
+  originalOptions: Iitems[] = [];
   dropdownOpen = false;
 
   toggleDropdown() {
@@ -58,15 +61,30 @@ export class ReusableDdlComponent {
     console.log("display selected vals", this.selectedValues)
     return this.selectedValues.map(value => value.name).join(', ') || 'Main Field';
   }
+
+  getFilteredValues(): Iitems[] {
+    if (this.searchQuery.trim() === '') {
+      console.log(this.originalOptions)
+      return this.originalOptions
+    } else {
+      const query = this.searchQuery.toLowerCase()
+      const filteredArray = this.originalOptions.filter(optionName => optionName.name.toLowerCase().includes(query))
+      console.log("filteredArray", filteredArray)
+      return filteredArray;
+    }
+  }
+
   selectAll() {
     if (this.ddlconfigOptions.isMultiValued) {
-      this.selectedValues = [...this.options]
+      this.selectedValues = [...this.originalOptions]
       this.selectionEvent.emit(this.selectedValues);
     }
   }
 
   reset() {
     this.selectedValues = []
+    this.searchQuery = ''
+    this.getFilteredValues()
   }
 
 
