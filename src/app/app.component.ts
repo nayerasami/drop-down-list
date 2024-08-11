@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IddlOptions } from './Models/iddl-options';
+import { IddlOptions, Iitems } from './Models/iddl-options';
 
 @Component({
   selector: 'app-root',
@@ -9,17 +9,18 @@ import { IddlOptions } from './Models/iddl-options';
 export class AppComponent {
   title = 'third-task';
   inputType: string = 'radio'
-  selectedData: string | string[] = ''
-  options: any[] = [
-    {id:1,name:'Computer Science'},
-    {id:2,name:'Design'},
-    {id:3,name:'User Interface Designes'}
+  selectedData: string | Iitems[] = ''
+  options: string[] = [
+    // {id:1,name:'Computer Science'},
+    // {id:2,name:'Design'},
+    // {id:3,name:'User Interface Designes'}
+     'Computer Science','Design','User Interface Designes'
   ]
 
   ddlconfig :IddlOptions ={
-    isMultiValued:false,
+    isMultiValued:true,
     isResettable:true,
-    isSearchabl:true,
+    isSearchable:true,
     items:this.options
    
   }
