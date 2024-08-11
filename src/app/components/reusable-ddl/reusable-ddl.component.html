@@ -19,22 +19,32 @@
           />
           <span
             *ngIf="ddlconfigOptions.isResettable"
-            class="input-group-text text-success"
+            class="input-group-text text-success resetBtn"
+            (click)="reset()"
             ><i class="bi bi-arrow-clockwise"></i
           ></span>
         </div>
         <div class="form-check my-2" *ngFor="let option of options">
           <input
-            class="form-check-input mt-0"
+            class="form-check-input"
             [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
             [value]="option.name"
             [checked]="isSelected(option)"
-            (change)="getSelectedValue(option)"
+            (change)="selectValues(option)"
             [id]="option.id"
             [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />
-          <label class="form-check-label" [for]="option.id">{{ option.name }}</label>
+          <label class="form-check-label" [for]="option.id">{{
+            option.name
+          }}</label>
         </div>
+        <button
+          *ngIf="ddlconfigOptions.isMultiValued"
+          class="btn btn-success"
+          (click)="selectAll()"
+        >
+          select all
+        </button>
       </div>
     </div>
   </div>

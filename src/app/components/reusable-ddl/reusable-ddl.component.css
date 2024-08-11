@@ -19,3 +19,7 @@
     background-color: transparent;
     color: black;
 }
+
+.resetBtn {
+    cursor: pointer;
+}

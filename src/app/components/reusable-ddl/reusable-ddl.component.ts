@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { IddlOptions } from 'src/app/Models/iddl-options';
+import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 
 @Component({
   selector: 'app-reusable-ddl',
@@ -7,9 +7,9 @@ import { IddlOptions } from 'src/app/Models/iddl-options';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent {
-  selectedValues: {id:number,name:string}[] = [];
+  selectedValues: { id: number, name: string }[] = [];
 
-  @Input() options: any[] = [];
+  @Input() options: Iitems[] = [];
   @Input() inputType: string = '';
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
@@ -26,17 +26,17 @@ export class ReusableDdlComponent {
   }
 
 
-  isSelected(option: { id: number, name: string }): boolean {
+  isSelected(option: Iitems): boolean {
     if (!this.ddlconfigOptions.isMultiValued) {
       return this.selectedValues.includes(option)
     } else {
-      console.log(this.selectedValues)
+      const index = this.selectedValues.some(selectedOption => selectedOption.id == option.id)
+      return index
 
-      return this.selectedValues.includes(option);
     }
   }
 
-  getSelectedValue(option: { id: number, name: string }) {
+  selectValues(option: Iitems) {
     const optionIndex = this.selectedValues.indexOf(option);
 
     if (optionIndex > -1) {
@@ -55,13 +55,19 @@ export class ReusableDdlComponent {
 
 
   displaySelectedVals() {
-
-    console.log("display selected vals",this.selectedValues)
+    console.log("display selected vals", this.selectedValues)
     return this.selectedValues.map(value => value.name).join(', ') || 'Main Field';
   }
+  selectAll() {
+    if (this.ddlconfigOptions.isMultiValued) {
+      this.selectedValues = [...this.options]
+      this.selectionEvent.emit(this.selectedValues);
+    }
+  }
 
-
-
+  reset() {
+    this.selectedValues = []
+  }
 
 
 }
