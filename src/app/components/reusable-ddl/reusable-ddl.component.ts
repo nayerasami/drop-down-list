@@ -7,53 +7,53 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent implements OnInit {
-  selectedValues:(string | Iitems)[] = [];
+  selectedValues: (string | Iitems)[] = [];
   searchQuery = ''
-
-  isStringArray =false;
-  originalOptions: (string | Iitems)[]= [];
+  isStringArray = false;
+  originalOptions: any[] = [];
   @Input() options: Iitems[] | string[] = [];
   @Input() inputType: string = '';
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
-    items: []
+    items: [],
+    uniqueKey: 'id'
   };
+
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
 
   ngOnInit(): void {
-    this.originalOptions = [...this.options]
-    if(typeof this.options[0] ==='string'){
-      this.isStringArray =true;
-    }
-    else{
-      this.isStringArray =false
-    }
-
+console.log(this.ddlconfigOptions)
+    this.originalOptions = [...this.getUniqueArray(this.options)]
+    console.log("filered original options", this.originalOptions)
   }
- 
+
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
 
-  isSelected(option: Iitems |string): boolean {
-    console.log("type of options",typeof option)
-    if(typeof option ==='string'){
-      return this.selectedValues.some(seletedVal => seletedVal ==option)
-    }else{
-    if (!this.ddlconfigOptions.isMultiValued) {
-      return this.selectedValues.includes(option)
-    } else {
-      const index = this.selectedValues.findIndex(selectedOption => (selectedOption as Iitems).id == option.id)
-      return index !==-1
+  isSelected(option: Iitems | string): boolean {
+    console.log("type of options", typeof option)
+    console.log("unique keyyyyyyy", this.getUniqueKey(option))
 
+    if (typeof option === 'string') {
+      const index = this.selectedValues.findIndex(seletedVal => seletedVal == option)
+      return index !== -1
+    } else {
+      const key = this.getUniqueKey(option) as keyof Iitems
+      console.log("key form isslected fun", key)
+
+      const index = this.selectedValues.findIndex(selectedOption => {
+        return typeof selectedOption === 'object' && selectedOption !== null && key in selectedOption && selectedOption[key] === option[key];
+      })
+      console.log("indeeexxx", index)
+      return index !== -1
     }
   }
-  }
 
-  selectValues(option:Iitems |string) {
+  selectValues(option: Iitems | string) {
 
     const optionIndex = this.selectedValues.indexOf(option);
 
@@ -68,36 +68,32 @@ export class ReusableDdlComponent implements OnInit {
     }
 
     this.selectionEvent.emit(this.selectedValues);
-    console.log("selection result",this.selectedValues)
+    console.log("selection result", this.selectedValues)
   }
 
 
   displaySelectedVals() {
     console.log("display selected vals", this.selectedValues)
-    if(typeof this.selectedValues[0] ==='string'){
+    if (typeof this.selectedValues[0] === 'string') {
       return this.selectedValues.join(',') || 'Main Field'
-    }else{
+    } else {
       return this.selectedValues.map(value => (value as Iitems).name).join(', ') || 'Main Field';
 
     }
   }
 
-  getFilteredValues(): (string | Iitems)[] {
+  getFilteredValues(): any {
     if (this.searchQuery.trim() === '') {
       console.log(this.originalOptions)
       return this.originalOptions
     } else {
       const query = this.searchQuery.toLowerCase()
 
-      if(typeof this.originalOptions[0] ==='string'){
-        const filteredArray = this.originalOptions.filter(option => (option as string).toLowerCase().includes(query))
-        console.log("filteredArray", filteredArray)
-        return filteredArray;
-      }else{
-      const filteredArray = this.originalOptions.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query))
-      console.log("filteredArray", filteredArray)
-      return filteredArray;
-    }
+      if (typeof this.originalOptions[0] === 'string') {
+        return this.originalOptions.filter(option => (option as string).toLowerCase().includes(query));
+      } else {
+        return this.originalOptions.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query));
+      }
     }
   }
 
@@ -114,22 +110,48 @@ export class ReusableDdlComponent implements OnInit {
     this.getFilteredValues()
   }
 
-  getOptionId(option :Iitems |string){
+  getOptionId(option: Iitems | string) {
     return typeof option === 'string' ? option : option.id;
+
+  }
+  private getUniqueKey(option: Iitems | string) {
+    if (typeof option === 'string') {
+      return option;
+    } else {
+      const key = this.ddlconfigOptions.uniqueKey as keyof Iitems || 'id';
+      console.log("kkkkkkkkkk", key)
+      return option[key] || option.id;  // Fallback logic
+    }
   }
 
-  getOptionName(option :Iitems |string){
+
+  getOptionName(option: Iitems | string) {
     return typeof option === 'string' ? option : option.name;
   }
 
-  
-  // checkOptionsType (){
-  //   if(typeof this.options[0] ==='string'){
-  //     this.isStringArray =true;
-  //   }
-  //   else{
-  //     this.isStringArray =false
-  //   }
-  // }
+  private getUniqueArray(array: (string | Iitems)[]) {
+    if (array.length === 0) return [];
+
+    if (typeof array[0] === 'string') {
+      return array.filter((item, index, self) => self.indexOf(item) === index);
+    }
+
+    const uniqueMap = new Map<any, Iitems>();
+
+    for (const item of array) {
+      if (typeof item === 'object' && item !== null) {
+        const uniqueKey = this.getUniqueKey(item);
+        console.log("uniqueKey from getuniqueArray",uniqueKey)
+        if (!uniqueMap.has(uniqueKey)) {
+          uniqueMap.set(uniqueKey, item);
+          console.log("unique mpapp" , uniqueMap)
+        }
+      }
+    }
+
+    console.log("uniqueMap.values",uniqueMap.values())
+    return Array.from(uniqueMap.values());
+
+  }
 
 }

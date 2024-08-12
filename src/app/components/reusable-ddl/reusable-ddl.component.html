@@ -26,6 +26,8 @@
           ></span>
         </div>
 
+        <!-- <ng-container *ngIf="isStringArray;else IitemsOptions"> -->
+
         <div class="form-check my-2" *ngFor="let option of getFilteredValues()">
           <input
             class="form-check-input"
@@ -33,14 +35,32 @@
             [value]="getOptionName(option)"
             [checked]="isSelected(option)"
             (change)="selectValues(option)"
-            [id]="getOptionId(option)"
+            [id]="option.id ? option.id : option"
             [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />
           <label class="form-check-label" [for]="getOptionId(option)">{{
             getOptionName(option)
           }}</label>
         </div>
+      <!-- </ng-container>
 
+      
+<ng-template #IitemsOptions>
+  <div class="form-check my-2" *ngFor="let option of getFilteredValues()">
+    <input
+      class="form-check-input"
+      [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
+      [value]="getOptionName(option)"
+      [checked]="isSelected(option)"
+      (change)="selectValues(option)"
+      [id]="getOptionId(option)"
+      [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
+    />
+    <label class="form-check-label" [for]="getOptionId(option)">{{
+      getOptionName(option)
+    }}</label>
+  </div>
+</ng-template> -->
         <button
           *ngIf="ddlconfigOptions.isMultiValued"
           class="btn btn-success"

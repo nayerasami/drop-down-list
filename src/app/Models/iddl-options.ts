@@ -1,9 +1,9 @@
 export interface IddlOptions {
-    uniqueKey?: any,
+    uniqueKey?: keyof Iitems| string,
     isMultiValued ?:boolean,
     isSearchabl?:boolean,
     isResettable?:boolean,
-    items:{}[] | string[],
+    items:any[],
 
 
 }
