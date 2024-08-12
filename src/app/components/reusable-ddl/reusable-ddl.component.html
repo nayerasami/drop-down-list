@@ -25,20 +25,22 @@
             ><i class="bi bi-arrow-clockwise"></i
           ></span>
         </div>
+
         <div class="form-check my-2" *ngFor="let option of getFilteredValues()">
           <input
             class="form-check-input"
             [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
-            [value]="option.name"
+            [value]="getOptionName(option)"
             [checked]="isSelected(option)"
             (change)="selectValues(option)"
-            [id]="option.id"
+            [id]="getOptionId(option)"
             [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />
-          <label class="form-check-label" [for]="option.id">{{
-            option.name
+          <label class="form-check-label" [for]="getOptionId(option)">{{
+            getOptionName(option)
           }}</label>
         </div>
+
         <button
           *ngIf="ddlconfigOptions.isMultiValued"
           class="btn btn-success"

@@ -7,39 +7,54 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent implements OnInit {
-  selectedValues: { id: number, name: string }[] = [];
+  selectedValues:(string | Iitems)[] = [];
   searchQuery = ''
-  @Input() options: Iitems[] = [];
+
+  isStringArray =false;
+  originalOptions: (string | Iitems)[]= [];
+  @Input() options: Iitems[] | string[] = [];
   @Input() inputType: string = '';
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
     items: []
   };
-
+  dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
 
   ngOnInit(): void {
     this.originalOptions = [...this.options]
+    if(typeof this.options[0] ==='string'){
+      this.isStringArray =true;
+    }
+    else{
+      this.isStringArray =false
+    }
+
   }
-  originalOptions: Iitems[] = [];
-  dropdownOpen = false;
+ 
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
 
-  isSelected(option: Iitems): boolean {
+  isSelected(option: Iitems |string): boolean {
+    console.log("type of options",typeof option)
+    if(typeof option ==='string'){
+      return this.selectedValues.some(seletedVal => seletedVal ==option)
+    }else{
     if (!this.ddlconfigOptions.isMultiValued) {
       return this.selectedValues.includes(option)
     } else {
-      const index = this.selectedValues.some(selectedOption => selectedOption.id == option.id)
-      return index
+      const index = this.selectedValues.findIndex(selectedOption => (selectedOption as Iitems).id == option.id)
+      return index !==-1
 
     }
   }
+  }
 
-  selectValues(option: Iitems) {
+  selectValues(option:Iitems |string) {
+
     const optionIndex = this.selectedValues.indexOf(option);
 
     if (optionIndex > -1) {
@@ -53,24 +68,36 @@ export class ReusableDdlComponent implements OnInit {
     }
 
     this.selectionEvent.emit(this.selectedValues);
-    console.log(this.selectedValues)
+    console.log("selection result",this.selectedValues)
   }
 
 
   displaySelectedVals() {
     console.log("display selected vals", this.selectedValues)
-    return this.selectedValues.map(value => value.name).join(', ') || 'Main Field';
+    if(typeof this.selectedValues[0] ==='string'){
+      return this.selectedValues.join(',') || 'Main Field'
+    }else{
+      return this.selectedValues.map(value => (value as Iitems).name).join(', ') || 'Main Field';
+
+    }
   }
 
-  getFilteredValues(): Iitems[] {
+  getFilteredValues(): (string | Iitems)[] {
     if (this.searchQuery.trim() === '') {
       console.log(this.originalOptions)
       return this.originalOptions
     } else {
       const query = this.searchQuery.toLowerCase()
-      const filteredArray = this.originalOptions.filter(optionName => optionName.name.toLowerCase().includes(query))
+
+      if(typeof this.originalOptions[0] ==='string'){
+        const filteredArray = this.originalOptions.filter(option => (option as string).toLowerCase().includes(query))
+        console.log("filteredArray", filteredArray)
+        return filteredArray;
+      }else{
+      const filteredArray = this.originalOptions.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query))
       console.log("filteredArray", filteredArray)
       return filteredArray;
+    }
     }
   }
 
@@ -87,5 +114,22 @@ export class ReusableDdlComponent implements OnInit {
     this.getFilteredValues()
   }
 
+  getOptionId(option :Iitems |string){
+    return typeof option === 'string' ? option : option.id;
+  }
+
+  getOptionName(option :Iitems |string){
+    return typeof option === 'string' ? option : option.name;
+  }
+
+  
+  // checkOptionsType (){
+  //   if(typeof this.options[0] ==='string'){
+  //     this.isStringArray =true;
+  //   }
+  //   else{
+  //     this.isStringArray =false
+  //   }
+  // }
 
 }
