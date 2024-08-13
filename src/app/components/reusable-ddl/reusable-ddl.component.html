@@ -17,6 +17,7 @@
             class="form-control"
             placeholder="Search"
             [(ngModel)]="searchQuery"
+            (input)="getFilteredValues()"
           />
           <span
             *ngIf="ddlconfigOptions.isResettable"
@@ -28,18 +29,18 @@
 
         <!-- <ng-container *ngIf="isStringArray;else IitemsOptions"> -->
 
-        <div class="form-check my-2" *ngFor="let option of getFilteredValues()">
+        <div class="form-check my-2" *ngFor="let option of originalOptions">
           <input
             class="form-check-input"
             [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
-            [value]="getOptionName(option)"
+            [value]="option.name ? option.name : option"
             [checked]="isSelected(option)"
             (change)="selectValues(option)"
             [id]="option.id ? option.id : option"
             [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />
-          <label class="form-check-label" [for]="getOptionId(option)">{{
-            getOptionName(option)
+          <label class="form-check-label" [for]="option.id ? option.id : option">{{
+            option.name ? option.name : option
           }}</label>
         </div>
       <!-- </ng-container>

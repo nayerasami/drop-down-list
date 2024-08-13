@@ -10,25 +10,25 @@ export class AppComponent  {
   title = 'third-task';
   inputType: string = 'radio'
   selectedData: string | string[] = ''
-  options: Iitems[] = [
-    { id: 0, name: 'Computer Science' },
-    { id: 1, name: 'uni' },
-    { id: 3, name: 'User Interface Designes' },
-    { id: 3, name: 'User Interface Designes' },
-    { id: 3, name: 'User Interface Designes' },
+  // options: any = [
+  //   { id: 0, name: 'Computer Science' },
+  //   { id: 1, name: 'Design' },
+  //   { id: 3, name: 'User Interface Designes' },
+  //   { id: 3, name: 'User Interface Designes' },
+  //   { id: 3, name: 'User Interface Designes' },
 
-  ]
-
-  // options: string[] = [
-  //   'Computer Science','Design' ,'User Interface Designs','User Interface Designs','User Interface Designs','User Interface Designs'
   // ]
+
+  options: string[] = [
+    'Computer Science','Design' ,'User Interface Designs','User Interface Designs','User Interface Designs','User Interface Designs'
+  ]
 
 
   ddlconfig: IddlOptions = {
     isMultiValued: true,
     isResettable: true,
     isSearchabl: true,
-    items: this.options,
+    // items: this.options,
     uniqueKey: 'id'
   }
 

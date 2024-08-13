@@ -3,7 +3,7 @@ export interface IddlOptions {
     isMultiValued ?:boolean,
     isSearchabl?:boolean,
     isResettable?:boolean,
-    items:any[],
+    // items:any[],
 
 
 }

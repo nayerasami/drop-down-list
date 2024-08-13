@@ -7,15 +7,15 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent implements OnInit {
-  selectedValues: (string | Iitems)[] = [];
+  selectedValues: string[] | Iitems[] = [];
   searchQuery = ''
   isStringArray = false;
-  originalOptions: any[] = [];
+  originalOptions: any = [];
   @Input() options: Iitems[] | string[] = [];
   @Input() inputType: string = '';
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
-    items: [],
+    // items: [],
     uniqueKey: 'id'
   };
 
@@ -23,9 +23,13 @@ export class ReusableDdlComponent implements OnInit {
   @Output() selectionEvent = new EventEmitter()
 
   ngOnInit(): void {
-console.log(this.ddlconfigOptions)
-    this.originalOptions = [...this.getUniqueArray(this.options)]
+    console.log(this.getUniqueArray(this.options))
+    this.originalOptions = this.getUniqueArray(this.options)
+    // this.originalOptions = [...this.options]
     console.log("filered original options", this.originalOptions)
+    if (typeof this.options[0] == 'string') {
+      this.isStringArray = true
+    }
   }
 
 
@@ -34,39 +38,72 @@ console.log(this.ddlconfigOptions)
   }
 
 
-  isSelected(option: Iitems | string): boolean {
-    console.log("type of options", typeof option)
-    console.log("unique keyyyyyyy", this.getUniqueKey(option))
+  isSelected(option: any): any {
 
-    if (typeof option === 'string') {
-      const index = this.selectedValues.findIndex(seletedVal => seletedVal == option)
-      return index !== -1
-    } else {
-      const key = this.getUniqueKey(option) as keyof Iitems
-      console.log("key form isslected fun", key)
+    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    const value = option[uniqueKey] ? option[uniqueKey] : option
+    console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv", value)
+    // if (typeof option === 'string') {
 
-      const index = this.selectedValues.findIndex(selectedOption => {
-        return typeof selectedOption === 'object' && selectedOption !== null && key in selectedOption && selectedOption[key] === option[key];
-      })
-      console.log("indeeexxx", index)
-      return index !== -1
-    }
+    //   console.log("unique key from string isSlected case ", key)
+    //   const index = this.selectedValues.findIndex(seletedVal => seletedVal === key)
+    //   return index !== -1
+    // } else {
+    //   const index = this.selectedValues.findIndex(selectedOption => {
+    //     return (selectedOption as Iitems)[key as keyof Iitems] === option[key as keyof Iitems];
+    //   })
+    //   //   console.log("indeeexxx", index)
+    //   return index !== -1
+    // }
+
+    const index = this.selectedValues.findIndex(selectedOptions => selectedOptions[uniqueKey] === value)
+    
+    console.log("indexxxxx", index)
+    return index !== -1
   }
 
-  selectValues(option: Iitems | string) {
+  selectValues(option: any) {
+    // const key = (typeof option === 'string' ? option : this.ddlconfigOptions.uniqueKey)
+    // if (typeof option === 'string') {
 
-    const optionIndex = this.selectedValues.indexOf(option);
+    //   const selectedArr = this.selectedValues as string[]
+    //   const optionIndex = selectedArr.indexOf(option)
+    //  if (optionIndex > -1) {
+    //     this.selectedValues.splice(optionIndex, 1);
+    //   } else {
+    //     if (!this.ddlconfigOptions.isMultiValued) {
+    //       this.selectedValues = [option];
+    //     } else {
+    //       selectedArr.push(option);
+    //     }
+    //   } 
+    // } else {
+    //   const selectedArr = this.selectedValues as Iitems[]
+    //   const optionIndex = selectedArr.findIndex(selectedOption => selectedOption[key as keyof Iitems] === option[key as keyof Iitems])
+    //   if (optionIndex > -1) {
+    //     this.selectedValues.splice(optionIndex, 1);
+    //   } else {
+    //     if (!this.ddlconfigOptions.isMultiValued) {
+    //       this.selectedValues = [option];
+    //     } else {
+    //       selectedArr.push(option);
+    //     }
+    //   }
 
+    // }
+
+    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    const value = option[uniqueKey] ? option[uniqueKey] : option
+    const optionIndex = this.selectedValues.indexOf(value)
     if (optionIndex > -1) {
       this.selectedValues.splice(optionIndex, 1);
     } else {
       if (!this.ddlconfigOptions.isMultiValued) {
-        this.selectedValues = [option];
+        this.selectedValues = [value];
       } else {
-        this.selectedValues.push(option);
+        this.selectedValues.push(value);
       }
     }
-
     this.selectionEvent.emit(this.selectedValues);
     console.log("selection result", this.selectedValues)
   }
@@ -82,76 +119,91 @@ console.log(this.ddlconfigOptions)
     }
   }
 
-  getFilteredValues(): any {
+  getFilteredValues() {
+
+    
+    // const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    // const value = option[uniqueKey] ? option[uniqueKey] : option
+
     if (this.searchQuery.trim() === '') {
-      console.log(this.originalOptions)
-      return this.originalOptions
+      this.originalOptions = this.getUniqueArray(this.options)
     } else {
       const query = this.searchQuery.toLowerCase()
-
       if (typeof this.originalOptions[0] === 'string') {
-        return this.originalOptions.filter(option => (option as string).toLowerCase().includes(query));
+        const selectedArray = this.originalOptions as string[]
+        this.originalOptions = selectedArray.filter(option => (option as string).toLowerCase().includes(query));
       } else {
-        return this.originalOptions.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query));
+        const selectedArray = this.originalOptions as Iitems[]
+        this.originalOptions = selectedArray.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query));
+
       }
     }
   }
 
   selectAll() {
     if (this.ddlconfigOptions.isMultiValued) {
-      this.selectedValues = [...this.originalOptions]
-      this.selectionEvent.emit(this.selectedValues);
+     // if (typeof this.options[0] == 'string') {
+        const selectedArray = this.originalOptions 
+        this.selectedValues = [...selectedArray]
+        console.log("sssss",selectedArray)
+        this.selectionEvent.emit(this.selectedValues);
+      // } else {
+      //   const selectedArray = this.originalOptions as Iitems[]
+      //   this.selectedValues = [...selectedArray]
+      //   this.selectionEvent.emit(this.selectedValues);
+      // }
+
     }
   }
 
   reset() {
     this.selectedValues = []
     this.searchQuery = ''
-    this.getFilteredValues()
   }
 
   getOptionId(option: Iitems | string) {
     return typeof option === 'string' ? option : option.id;
 
   }
-  private getUniqueKey(option: Iitems | string) {
-    if (typeof option === 'string') {
-      return option;
-    } else {
-      const key = this.ddlconfigOptions.uniqueKey as keyof Iitems || 'id';
-      console.log("kkkkkkkkkk", key)
-      return option[key] || option.id;  // Fallback logic
-    }
-  }
-
 
   getOptionName(option: Iitems | string) {
     return typeof option === 'string' ? option : option.name;
   }
 
-  private getUniqueArray(array: (string | Iitems)[]) {
-    if (array.length === 0) return [];
 
-    if (typeof array[0] === 'string') {
-      return array.filter((item, index, self) => self.indexOf(item) === index);
-    }
 
-    const uniqueMap = new Map<any, Iitems>();
 
+  private getUniqueArray(array:any): any[] {
+    const uniqueSet = new Set();
+    const uniqueArray: string[] | Iitems[] = [];
+
+    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     for (const item of array) {
-      if (typeof item === 'object' && item !== null) {
-        const uniqueKey = this.getUniqueKey(item);
-        console.log("uniqueKey from getuniqueArray",uniqueKey)
-        if (!uniqueMap.has(uniqueKey)) {
-          uniqueMap.set(uniqueKey, item);
-          console.log("unique mpapp" , uniqueMap)
-        }
+      const value =item[uniqueKey] ? item [uniqueKey] :item
+      if(!uniqueSet.has(value)){
+        uniqueSet.add(value)
+        uniqueArray.push(item)
       }
+      // if (typeof item === 'string') {
+      //   const key = item
+      //   if (!uniqueSet.has(key)) {
+      //     uniqueSet.add(key);
+      //     (uniqueArray as string[]).push(key);
+      //   }
+      // } else {
+      //   const uniqueKey = item[this.ddlconfigOptions.uniqueKey as keyof Iitems];
+      //   if (!uniqueSet.has(uniqueKey)) {
+      //     uniqueSet.add(uniqueKey);
+      //     (uniqueArray as Iitems[]).push(item);
+      //   }
+      // }
     }
 
-    console.log("uniqueMap.values",uniqueMap.values())
-    return Array.from(uniqueMap.values());
-
+    console.log("uniqqqq", uniqueArray)
+    return uniqueArray;
   }
+
+
+
 
 }
