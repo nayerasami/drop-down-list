@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 
 @Component({
@@ -6,7 +6,7 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
   templateUrl: './reusable-ddl.component.html',
   styleUrls: ['./reusable-ddl.component.css']
 })
-export class ReusableDdlComponent implements OnInit {
+export class ReusableDdlComponent implements OnInit, OnChanges {
   selectedValues: any = [];
   searchQuery = ''
   uniqueKey: any;
@@ -15,6 +15,7 @@ export class ReusableDdlComponent implements OnInit {
   originalOptions: any = [];
   @Input() options: any = [];
   @Input() inputType: string = '';
+  @Input() loading: boolean = false
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
     // items: [],
@@ -23,14 +24,41 @@ export class ReusableDdlComponent implements OnInit {
 
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
+  @Output() loadMore = new EventEmitter()
+
 
   ngOnInit(): void {
     this.showKey = this.ddlconfigOptions.showKey || 'title';
     this.uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     this.searchCode = this.ddlconfigOptions.searchKey || 'code'
-    this.originalOptions = this.getUniqueArray(this.options)
+
 
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['options']) {
+      console.log('Options updated in child:', this.options);
+      this.originalOptions = this.getUniqueArray(this.options)
+    }
+  }
+
+  onScroll(event: any) {
+
+    console.log(event.target)
+    const element = event.target;
+
+    console.log(element.scrollHeight)
+    if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+this.loading=true
+      this.loadMoreItems()
+    }
+
+  }
+
+  loadMoreItems() {
+    this.loadMore.emit()
+  }
+
 
 
   toggleDropdown() {

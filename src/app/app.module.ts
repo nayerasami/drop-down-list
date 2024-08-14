@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { DropDownListComponent } from './components/drop-down-list/drop-down-list.component';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,8 @@ import { ReusableDdlComponent } from './components/reusable-ddl/reusable-ddl.com
   ],
   imports: [
     BrowserModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

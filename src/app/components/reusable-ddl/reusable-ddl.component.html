@@ -8,7 +8,6 @@
         aria-expanded="dropdownOpen"
       >
         {{ displaySelectedVals() }}
-         
       </button>
       <div class="dropdown-menu" [class.show]="dropdownOpen">
         <div class="input-group my-3">
@@ -28,7 +27,6 @@
           ></span>
         </div>
 
-
         <div class="form-check my-2" *ngFor="let option of originalOptions">
           <input
             class="form-check-input"
@@ -39,11 +37,13 @@
             [id]="option[uniqueKey] ? option[uniqueKey] : option"
             [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
           />
-          <label class="form-check-label" [for]="option[uniqueKey] ? option[uniqueKey] : option">{{
-            option[showKey]? option[showKey] : option
-          }}</label>
+          <label
+            class="form-check-label"
+            [for]="option[uniqueKey] ? option[uniqueKey] : option"
+            >{{ option[showKey] ? option[showKey] : option }}</label
+          >
         </div>
-  
+        <p class="text-success text-center" *ngIf="loading">Loading ...</p>
         <button
           *ngIf="ddlconfigOptions.isMultiValued"
           class="btn btn-success"
