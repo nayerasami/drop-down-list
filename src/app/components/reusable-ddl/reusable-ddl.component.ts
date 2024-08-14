@@ -9,7 +9,6 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 export class ReusableDdlComponent implements OnInit {
   selectedValues: any = [];
   searchQuery = ''
-  isStringArray = false;
   originalOptions: any = [];
   @Input() options: any = [];
   @Input() inputType: string = '';
@@ -27,9 +26,7 @@ export class ReusableDdlComponent implements OnInit {
     this.originalOptions = this.getUniqueArray(this.options)
     // this.originalOptions = [...this.options]
     console.log("filered original options", this.originalOptions)
-    if (typeof this.options[0] == 'string') {
-      this.isStringArray = true
-    }
+
   }
 
 
@@ -42,13 +39,13 @@ export class ReusableDdlComponent implements OnInit {
 
     const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     const value = typeof option === 'object' ? option[uniqueKey] : option;
-    //console.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv", value)
-      const index = this.selectedValues.findIndex((selectedOption: any) => {
-        const selectedValue = typeof selectedOption === 'object' ? selectedOption[uniqueKey] : selectedOption;
-        return selectedValue === value;
-      });
-    console.log(index,"index isselceted")
-    return index !==-1
+    const index = this.selectedValues.findIndex((selectedOption: any) => {
+      const selectedValue = typeof selectedOption === 'object' ? selectedOption[uniqueKey] : selectedOption;
+      console.log("selectedValll", selectedValue)
+      return selectedValue === value;
+    });
+    console.log(index, "index isselceted")
+    return index !== -1
   }
 
 
@@ -61,9 +58,10 @@ export class ReusableDdlComponent implements OnInit {
       this.selectedValues.splice(optionIndex, 1);
     } else {
       if (!this.ddlconfigOptions.isMultiValued) {
-        this.selectedValues = [value];
+        console.log(value)
+        this.selectedValues = [option];
       } else {
-        this.selectedValues.push(value);
+        this.selectedValues.push(option);
       }
     }
     this.selectionEvent.emit(this.selectedValues);
@@ -71,43 +69,44 @@ export class ReusableDdlComponent implements OnInit {
   }
 
 
-  // displaySelectedVals() {
-  //   console.log("display selected vals", this.selectedValues)
-  //   if (typeof this.selectedValues[0] === 'string') {
-  //     return this.selectedValues.join(',') || 'Main Field'
-  //   } else {
-  //     return this.selectedValues.map(value => (value as Iitems).name).join(', ') || 'Main Field';
+  displaySelectedVals() {
+    return this.selectedValues
+      .map((value: any) => {
+        if (typeof value === 'object') {
+          return value.name
+        }
+        return value;
+      })
+      .join(', ') || 'Main Field';
 
-  //   }
-  // }
+  }
 
 
   getFilteredValues() {
 
 
-    // const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     // const value = option[uniqueKey] ? option[uniqueKey] : option
 
     if (this.searchQuery.trim() === '') {
       this.originalOptions = this.getUniqueArray(this.options)
     } else {
       const query = this.searchQuery.toLowerCase()
-      if (typeof this.originalOptions[0] === 'string') {
-        const selectedArray = this.originalOptions as string[]
-        this.originalOptions = selectedArray.filter(option => (option as string).toLowerCase().includes(query));
-      } else {
-        const selectedArray = this.originalOptions as Iitems[]
-        this.originalOptions = selectedArray.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query));
+      const selectedArray = this.originalOptions;
+      this.originalOptions = selectedArray.filter((option: any) => {
+        const value = option[uniqueKey] ? option.name : option
+        console.log(value)
+        return value.toString().toLowerCase().includes(query)
+      })
 
-      }
     }
   }
 
   selectAll() {
     if (this.ddlconfigOptions.isMultiValued) {
-     // this.selectedValues = [...this.originalOptions]
+      // this.selectedValues = [...this.originalOptions]
       this.selectedValues = [...this.getUniqueArray(this.originalOptions)]
-     // console.log("sssss", selectedArray)
+      // console.log("sssss", selectedArray)
       this.selectionEvent.emit(this.selectedValues);
     }
   }

@@ -6,7 +6,7 @@ import { IddlOptions, Iitems } from './Models/iddl-options';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent  {
+export class AppComponent {
   title = 'third-task';
   inputType: string = 'radio'
   selectedData: any = ''
@@ -19,8 +19,8 @@ export class AppComponent  {
 
   ]
 
-  // options:any[] = [
-  //   'Computer Science','Design' ,'User Interface Designs','User Interface Designs','User Interface Designs','User Interface Designs'
+  // options: any[] = [
+  //   'Computer Science', 'Design', 'User Interface Designs', 'User Interface Designs', 'User Interface Designs', 'User Interface Designs'
   // ]
 
 
