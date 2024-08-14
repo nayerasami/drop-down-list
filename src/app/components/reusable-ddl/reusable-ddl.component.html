@@ -7,7 +7,8 @@
         (click)="toggleDropdown()"
         aria-expanded="dropdownOpen"
       >
-        {{ displaySelectedVals() }}
+        <!-- {{ displaySelectedVals() }} -->
+          Man field
       </button>
       <div class="dropdown-menu" [class.show]="dropdownOpen">
         <div class="input-group my-3">
@@ -27,7 +28,6 @@
           ></span>
         </div>
 
-        <!-- <ng-container *ngIf="isStringArray;else IitemsOptions"> -->
 
         <div class="form-check my-2" *ngFor="let option of originalOptions">
           <input
@@ -43,25 +43,7 @@
             option.name ? option.name : option
           }}</label>
         </div>
-      <!-- </ng-container>
-
-      
-<ng-template #IitemsOptions>
-  <div class="form-check my-2" *ngFor="let option of getFilteredValues()">
-    <input
-      class="form-check-input"
-      [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"
-      [value]="getOptionName(option)"
-      [checked]="isSelected(option)"
-      (change)="selectValues(option)"
-      [id]="getOptionId(option)"
-      [name]="ddlconfigOptions.isMultiValued ? 'multiple' : 'single'"
-    />
-    <label class="form-check-label" [for]="getOptionId(option)">{{
-      getOptionName(option)
-    }}</label>
-  </div>
-</ng-template> -->
+  
         <button
           *ngIf="ddlconfigOptions.isMultiValued"
           class="btn btn-success"
