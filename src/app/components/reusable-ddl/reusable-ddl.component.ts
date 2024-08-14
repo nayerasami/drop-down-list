@@ -9,6 +9,9 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 export class ReusableDdlComponent implements OnInit {
   selectedValues: any = [];
   searchQuery = ''
+  uniqueKey: any;
+  showKey: any;
+  searchCode: any;
   originalOptions: any = [];
   @Input() options: any = [];
   @Input() inputType: string = '';
@@ -22,10 +25,10 @@ export class ReusableDdlComponent implements OnInit {
   @Output() selectionEvent = new EventEmitter()
 
   ngOnInit(): void {
-    console.log(this.getUniqueArray(this.options))
+    this.showKey = this.ddlconfigOptions.showKey || 'title';
+    this.uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    this.searchCode = this.ddlconfigOptions.searchKey || 'code'
     this.originalOptions = this.getUniqueArray(this.options)
-    // this.originalOptions = [...this.options]
-    console.log("filered original options", this.originalOptions)
 
   }
 
@@ -36,66 +39,50 @@ export class ReusableDdlComponent implements OnInit {
 
 
   isSelected(option: any): any {
-
-    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
-    const value = typeof option === 'object' ? option[uniqueKey] : option;
+    const value = typeof option === 'object' ? option[this.uniqueKey] : option;
     const index = this.selectedValues.findIndex((selectedOption: any) => {
-      const selectedValue = typeof selectedOption === 'object' ? selectedOption[uniqueKey] : selectedOption;
-      console.log("selectedValll", selectedValue)
+      const selectedValue = typeof selectedOption === 'object' ? selectedOption[this.uniqueKey] : selectedOption;
       return selectedValue === value;
     });
-    console.log(index, "index isselceted")
     return index !== -1
   }
 
-
-
   selectValues(option: any) {
-    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
-    const value = option[uniqueKey] ? option[uniqueKey] : option
-    const optionIndex = this.selectedValues.indexOf(value)
+    //const value = option[this.uniqueKey] ? option[this.uniqueKey] : option
+    const optionIndex = this.selectedValues.indexOf(option)
     if (optionIndex > -1) {
       this.selectedValues.splice(optionIndex, 1);
     } else {
       if (!this.ddlconfigOptions.isMultiValued) {
-        console.log(value)
         this.selectedValues = [option];
       } else {
         this.selectedValues.push(option);
       }
     }
     this.selectionEvent.emit(this.selectedValues);
-    console.log("selection result", this.selectedValues)
   }
 
 
   displaySelectedVals() {
     return this.selectedValues
       .map((value: any) => {
-        if (typeof value === 'object') {
-          return value.name
-        }
-        return value;
+        const val = value[this.showKey] ? value[this.showKey] : value
+        return val;
       })
       .join(', ') || 'Main Field';
 
   }
 
 
-  getFilteredValues() {
-
-
-    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
-    // const value = option[uniqueKey] ? option[uniqueKey] : option
-
-    if (this.searchQuery.trim() === '') {
+  searchValues() {
+    if (this.searchQuery.trim() == '') {
       this.originalOptions = this.getUniqueArray(this.options)
     } else {
       const query = this.searchQuery.toLowerCase()
-      const selectedArray = this.originalOptions;
+      const selectedArray = this.getUniqueArray(this.options);
       this.originalOptions = selectedArray.filter((option: any) => {
-        const value = option[uniqueKey] ? option.name : option
-        console.log(value)
+        const isShowKey = option[this.showKey] ? option[this.showKey] : option;
+        const value = option[this.searchCode] ? option[this.searchCode] : isShowKey
         return value.toString().toLowerCase().includes(query)
       })
 
@@ -104,33 +91,28 @@ export class ReusableDdlComponent implements OnInit {
 
   selectAll() {
     if (this.ddlconfigOptions.isMultiValued) {
-      // this.selectedValues = [...this.originalOptions]
       this.selectedValues = [...this.getUniqueArray(this.originalOptions)]
-      // console.log("sssss", selectedArray)
       this.selectionEvent.emit(this.selectedValues);
     }
   }
 
   reset() {
     this.selectedValues = []
+    this.originalOptions = this.getUniqueArray(this.options)
     this.searchQuery = ''
+    // this.searchValues()
   }
 
   private getUniqueArray(array: any): any[] {
     const uniqueSet = new Set();
-    const uniqueArray: string[] | Iitems[] = [];
-
-    const uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    const uniqueArray: any[] = [];
     for (const item of array) {
-      const value = item[uniqueKey] ? item[uniqueKey] : item
+      const value = item[this.uniqueKey] ? item[this.uniqueKey] : item
       if (!uniqueSet.has(value)) {
         uniqueSet.add(value)
         uniqueArray.push(item)
       }
-
     }
-
-    console.log("uniqqqq", uniqueArray)
     return uniqueArray;
   }
 
