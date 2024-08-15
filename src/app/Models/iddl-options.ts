@@ -6,8 +6,10 @@ export interface IddlOptions {
     // items:any[],
     showKey?:any,
     searchKey?:any,
-    baseUrl?:string
-
+    baseUrl?:string,
+    limit?:number,
+    page?:number
+    
 
 }
 

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 import { ItemsService } from 'src/app/services/items.service';
 
@@ -14,18 +14,24 @@ export class ReusableDdlComponent implements OnInit {
   showKey: any;
   searchCode: any;
   apiEndPoint: any;
-  page = 1;
-  limit = 10;
+  page: any;
+  limit: any;
+  private currentPage: any
+  private totalPagesNo: any;
+  itemTotalNumber: any
   originalOptions: any = [];
-  @Input() options: any = [];
+  options: any = [];
   @Input() inputType: string = '';
   @Input() loading: boolean = false
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
     // items: [],
     uniqueKey: 'id',
-    baseUrl: ''
+
+
   };
+
+  @Input() defualtSelectedValues: any = []
 
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
@@ -38,25 +44,35 @@ export class ReusableDdlComponent implements OnInit {
     this.uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     this.searchCode = this.ddlconfigOptions.searchKey || 'code'
     this.apiEndPoint = this.ddlconfigOptions.baseUrl
-    this.loadItems()
-    this.originalOptions = this.getUniqueArray(this.options)
+    this.page = this.ddlconfigOptions.page
+    this.limit = this.ddlconfigOptions.limit;
+    console.log(this.defualtSelectedValues, "defualt valss")
+
+    if (this.ddlconfigOptions.baseUrl) {
+      this.loadItems()
+    } else {
+      this.originalOptions = this.getUniqueArray(this.options)
+    }
+    this.getDefualtSelectedVals()
+
+    console.log(this.options, "options from oninit ")
 
   }
 
-  // ngOnChanges(changes: SimpleChanges) {
-  //   if (changes['options']) {
-  //     console.log('Options updated in child:', this.options);
-  //     this.originalOptions = this.getUniqueArray(this.options)
-  //   }
-  // }
+
+
 
   loadItems() {
-    this.itemService.getItems(this.apiEndPoint, this.page, this.limit).subscribe({
+    this.itemService.getItems(this.apiEndPoint, this.page, this.limit, this.searchQuery).subscribe({
       next: (response: any) => {
         console.log(response.data.items, "resss")
         const items = response.data.items
+        this.itemTotalNumber = response.data.totalNumber
+        this.currentPage = response.data.page
+        this.totalPagesNo = response.data.numberOfPages
         this.options = [...this.options, ...items]
-        console.log(this.options, "thisss")
+        this.originalOptions = this.getUniqueArray(this.options)
+      
         this.loading = false;
       },
       error: error => {
@@ -64,21 +80,24 @@ export class ReusableDdlComponent implements OnInit {
       }
     })
   }
+
+
   onScroll(event: any) {
-
-    console.log(event.target)
-    const element = event.target;
-
-    console.log(element.scrollHeight)
-    if (element.scrollHeight - element.scrollTop === element.clientHeight) {
-      this.loading = true
-      this.loadMoreItems()
+    if (this.ddlconfigOptions.baseUrl) {
+      const element = event.target;
+      if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+        if (!this.loading && this.options.length < this.itemTotalNumber && this.currentPage < this.totalPagesNo) {
+          this.loadMoreItems();
+        }
+      }
     }
 
   }
 
   loadMoreItems() {
-    this.loadMore.emit()
+    this.page++;
+    this.loading = true;
+    this.loadItems()
   }
 
 
@@ -113,6 +132,22 @@ export class ReusableDdlComponent implements OnInit {
   }
 
 
+
+
+
+  getDefualtSelectedVals() {
+    const defaultValuesArray = this.getUniqueArray(this.defualtSelectedValues);
+    console.log("defaultValuesArray", defaultValuesArray);
+    this.originalOptions=[...defaultValuesArray,...this.options] 
+    this.selectedValues =[...defaultValuesArray]
+    console.log("Updated originalOptions", this.originalOptions);
+    console.log("Updated selectedValues", this.selectedValues);
+  }
+
+
+
+
+
   displaySelectedVals() {
     return this.selectedValues
       .map((value: any) => {
@@ -123,26 +158,39 @@ export class ReusableDdlComponent implements OnInit {
 
   }
 
-
   searchValues() {
-    if (this.searchQuery.trim() == '') {
-      this.originalOptions = this.getUniqueArray(this.options)
+    if (this.ddlconfigOptions.baseUrl) {
+      if (this.searchQuery.trim() === '') {
+        this.page = 1;
+        this.options = [];
+        this.loadItems();
+      } else {
+        this.page = 1;
+        this.options = [];
+        this.loadItems();
+      }
     } else {
       const query = this.searchQuery.toLowerCase()
-      const selectedArray = this.getUniqueArray(this.options);
-      this.originalOptions = selectedArray.filter((option: any) => {
-        const isShowKey = option[this.showKey] ? option[this.showKey] : option;
-        const value = option[this.searchCode] ? option[this.searchCode] : isShowKey
+      this.originalOptions = this.getUniqueArray(this.options).filter((option: any) => {
+        const showKey = option[this.showKey] ? option[this.showKey] : option;
+        const value = option[this.searchCode] ? option[this.searchCode] : showKey
         return value.toString().toLowerCase().includes(query)
       })
-
     }
   }
 
+
   selectAll() {
     if (this.ddlconfigOptions.isMultiValued) {
-      this.selectedValues = [...this.getUniqueArray(this.originalOptions)]
-      this.selectionEvent.emit(this.selectedValues);
+      if(this.defualtSelectedValues.length >0){
+        const newArray=[...this.options,...this.defualtSelectedValues]
+        this.selectedValues =[...this.getUniqueArray(newArray)]
+        console.log(this.selectedValues ,"selectedValues from selectall")
+      }else{
+        this.selectedValues = [...this.getUniqueArray(this.originalOptions)]
+        this.selectionEvent.emit(this.selectedValues);
+      }
+ 
     }
   }
 
@@ -150,7 +198,6 @@ export class ReusableDdlComponent implements OnInit {
     this.selectedValues = []
     this.originalOptions = this.getUniqueArray(this.options)
     this.searchQuery = ''
-    // this.searchValues()
   }
 
   private getUniqueArray(array: any): any[] {
