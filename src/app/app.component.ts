@@ -7,7 +7,7 @@ import { ItemsService } from './services/items.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent  {
 
   constructor(private itemService: ItemsService) { }
 
@@ -15,8 +15,7 @@ export class AppComponent implements OnInit {
   title = 'third-task';
   inputType: string = 'radio'
   selectedData: any = ''
-  page = 1;
-  limit = 10;
+ 
   options: any[] = [];
   loading = false;
 
@@ -30,25 +29,11 @@ export class AppComponent implements OnInit {
   // ]
 
 
-  ngOnInit(): void {
-    this.loadItems()
-    console.log("options", this.options)
-  }
+  // ngOnInit(): void {
+  //   this.loadItems()
+  //   console.log("options", this.options)
+  // }
 
-  loadItems() {
-    this.itemService.getItems(this.page, this.limit).subscribe({
-      next: (response: any) => {
-        console.log(response.data.items, "resss")
-        const items = response.data.items
-        this.options = [...this.options, ...items]
-        console.log(this.options, "thisss")
-        this.loading = false;
-      },
-      error: error => {
-        console.error(error, "error")
-      }
-    })
-  }
 
 
 
@@ -58,7 +43,8 @@ export class AppComponent implements OnInit {
     isSearchabl: true,
     uniqueKey: 'id',
     showKey: 'title',
-    searchKey: 'code'
+    searchKey: 'code',
+    baseUrl:'http://localhost:4000/api/v1/items'
   }
 
   getSelectedData(e: string) {

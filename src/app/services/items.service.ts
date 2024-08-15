@@ -10,8 +10,8 @@ export class ItemsService {
 
   constructor(private http: HttpClient) { }
 
-  getItems(page: number, limit: number) {
-    return this.http.get(`http://localhost:4000/api/v1/items?page=${page}&limit=${limit}`)
+  getItems(baseUrl:string,page: number, limit: number) {
+    return this.http.get(`${baseUrl}?page=${page}&limit=${limit}`)
   }
 
 }

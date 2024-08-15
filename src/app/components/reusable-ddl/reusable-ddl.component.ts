@@ -1,17 +1,21 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
+import { ItemsService } from 'src/app/services/items.service';
 
 @Component({
   selector: 'app-reusable-ddl',
   templateUrl: './reusable-ddl.component.html',
   styleUrls: ['./reusable-ddl.component.css']
 })
-export class ReusableDdlComponent implements OnInit, OnChanges {
+export class ReusableDdlComponent implements OnInit {
   selectedValues: any = [];
   searchQuery = ''
   uniqueKey: any;
   showKey: any;
   searchCode: any;
+  apiEndPoint: any;
+  page = 1;
+  limit = 10;
   originalOptions: any = [];
   @Input() options: any = [];
   @Input() inputType: string = '';
@@ -19,29 +23,47 @@ export class ReusableDdlComponent implements OnInit, OnChanges {
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
     // items: [],
-    uniqueKey: 'id'
+    uniqueKey: 'id',
+    baseUrl: ''
   };
 
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
   @Output() loadMore = new EventEmitter()
 
+  constructor(private itemService: ItemsService) { }
 
   ngOnInit(): void {
     this.showKey = this.ddlconfigOptions.showKey || 'title';
     this.uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     this.searchCode = this.ddlconfigOptions.searchKey || 'code'
-
+    this.apiEndPoint = this.ddlconfigOptions.baseUrl
+    this.loadItems()
+    this.originalOptions = this.getUniqueArray(this.options)
 
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['options']) {
-      console.log('Options updated in child:', this.options);
-      this.originalOptions = this.getUniqueArray(this.options)
-    }
-  }
+  // ngOnChanges(changes: SimpleChanges) {
+  //   if (changes['options']) {
+  //     console.log('Options updated in child:', this.options);
+  //     this.originalOptions = this.getUniqueArray(this.options)
+  //   }
+  // }
 
+  loadItems() {
+    this.itemService.getItems(this.apiEndPoint, this.page, this.limit).subscribe({
+      next: (response: any) => {
+        console.log(response.data.items, "resss")
+        const items = response.data.items
+        this.options = [...this.options, ...items]
+        console.log(this.options, "thisss")
+        this.loading = false;
+      },
+      error: error => {
+        console.error(error, "error")
+      }
+    })
+  }
   onScroll(event: any) {
 
     console.log(event.target)
@@ -49,7 +71,7 @@ export class ReusableDdlComponent implements OnInit, OnChanges {
 
     console.log(element.scrollHeight)
     if (element.scrollHeight - element.scrollTop === element.clientHeight) {
-this.loading=true
+      this.loading = true
       this.loadMoreItems()
     }
 

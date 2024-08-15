@@ -5,7 +5,8 @@ export interface IddlOptions {
     isResettable?:boolean,
     // items:any[],
     showKey?:any,
-    searchKey?:any
+    searchKey?:any,
+    baseUrl?:string
 
 
 }
