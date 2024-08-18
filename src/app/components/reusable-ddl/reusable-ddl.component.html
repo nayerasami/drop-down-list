@@ -1,15 +1,16 @@
 <div class="ddl">
   <div class="form-group">
-    <div class="dropdown" [class.show]="dropdownOpen">
-      <button
+    <div class="dropdown" #dropDownList [class.show]="dropdownOpen"   >
+      <p *ngIf="hasError"  class="text-danger">{{errorMsg}}</p>
+      <div
         class="btn btn-outline-secondary dropdown-toggle"
         type="button"
-        (click)="toggleDropdown()"
+        (click)="toggleDropdown($event)"
         aria-expanded="dropdownOpen"
       >
         {{ displaySelectedVals() }}
-      </button>
-      <div class="dropdown-menu" [class.show]="dropdownOpen" [ngStyle]="{'max-height':limit >4 ? '250px' :'150px'}"  (scroll)="onScroll($event)">
+    </div>
+      <div class="dropdown-menu"  [class.show]="dropdownOpen" [ngStyle]="{'max-height':limit >4 ? '250px' :'150px'}"  (scroll)="onScroll($event)">
         <div class="input-group my-3">
           <input
             *ngIf="ddlconfigOptions.isSearchabl"
@@ -33,8 +34,9 @@
           select all
         </button>
         </div>
-     
-        <div class="form-check my-2" *ngFor="let option of originalOptions">
+      
+      
+        <div class="form-check my-2" *ngFor="let option of originalOptions"   >
           <input
             class="form-check-input"
             [type]="ddlconfigOptions.isMultiValued ? 'checkbox' : 'radio'"

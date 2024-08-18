@@ -9,7 +9,7 @@ export interface IddlOptions {
     baseUrl?:string,
     limit?:number,
     page?:number
-    
+    validators? :any
 
 }
 
