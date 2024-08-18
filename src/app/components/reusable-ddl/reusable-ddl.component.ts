@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
+import { ItemsService } from 'src/app/services/items.service';
 
 @Component({
   selector: 'app-reusable-ddl',
@@ -7,56 +8,141 @@ import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent implements OnInit {
-  selectedValues: (string | Iitems)[] = [];
+  @ViewChild('dropDownList') dropDownListRef! :ElementRef<HTMLElement>
+  selectedValues: any = [];
   searchQuery = ''
-  isStringArray = false;
-  originalOptions: any[] = [];
-  @Input() options: Iitems[] | string[] = [];
+  uniqueKey: any;
+  showKey: any;
+  hasError: any = false;
+  searchCode: any;
+  apiEndPoint: any;
+  errorMsg: any;
+  page: any;
+  limit: any;
+  private currentPage: any
+  private totalPagesNo: any;
+  itemTotalNumber: any
+  originalOptions: any = [];
+  options: any = [];
   @Input() inputType: string = '';
+  @Input() loading: boolean = false
   @Input() ddlconfigOptions: IddlOptions = {
     isMultiValued: false,
-    items: [],
-    uniqueKey: 'id'
+    // items: [],
+    uniqueKey: 'id',
+
+
   };
+
+  @Input() defualtSelectedValues: any = []
 
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
+  @Output() loadMore = new EventEmitter()
+
+
+  constructor(private itemService: ItemsService) { }
 
   ngOnInit(): void {
-console.log(this.ddlconfigOptions)
-    this.originalOptions = [...this.getUniqueArray(this.options)]
-    console.log("filered original options", this.originalOptions)
-  }
 
+    this.showKey = this.ddlconfigOptions.showKey || 'title';
+    this.uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
+    this.searchCode = this.ddlconfigOptions.searchKey || 'code'
+    this.apiEndPoint = this.ddlconfigOptions.baseUrl
+    this.page = this.ddlconfigOptions.page
+    this.limit = this.ddlconfigOptions.limit;
 
-  toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
-  }
-
-
-  isSelected(option: Iitems | string): boolean {
-    console.log("type of options", typeof option)
-    console.log("unique keyyyyyyy", this.getUniqueKey(option))
-
-    if (typeof option === 'string') {
-      const index = this.selectedValues.findIndex(seletedVal => seletedVal == option)
-      return index !== -1
+    if (this.ddlconfigOptions.baseUrl) {
+      this.loadItems()
     } else {
-      const key = this.getUniqueKey(option) as keyof Iitems
-      console.log("key form isslected fun", key)
-
-      const index = this.selectedValues.findIndex(selectedOption => {
-        return typeof selectedOption === 'object' && selectedOption !== null && key in selectedOption && selectedOption[key] === option[key];
-      })
-      console.log("indeeexxx", index)
-      return index !== -1
+      this.originalOptions = this.getUniqueArray(this.options)
     }
+    this.getDefualtSelectedVals()
+
+
   }
 
-  selectValues(option: Iitems | string) {
+  loadItems() {
+    this.itemService.getItems(this.apiEndPoint, this.page, this.limit, this.searchQuery).subscribe({
+      next: (response: any) => {
+        const items = response.data.items
+        this.itemTotalNumber = response.data.totalNumber
+        this.currentPage = response.data.page
+        this.totalPagesNo = response.data.numberOfPages
+        this.options = [...this.options, ...items]
+        this.originalOptions = this.getUniqueArray(this.options)
 
-    const optionIndex = this.selectedValues.indexOf(option);
+        this.loading = false;
+      },
+      error: error => {
+        console.error(error, "error")
+      }
+    })
+  }
 
+  getSelectedValues(){return this.selectedValues}
+
+  setSelectItems(items: any) {
+    this.selectedValues = items
+  }
+  onScroll(event: any) {
+    if (this.ddlconfigOptions.baseUrl) {
+      const element = event.target;
+      if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+        if (!this.loading && this.options.length < this.itemTotalNumber && this.currentPage < this.totalPagesNo) {
+          this.loadMoreItems();
+        }
+      }
+    }
+
+  }
+
+  loadMoreItems() {
+    this.page++;
+    this.loading = true;
+    this.loadItems()
+  }
+
+
+
+  toggleDropdown(event: MouseEvent) {
+    event.stopPropagation()
+
+    this.dropdownOpen = !this.dropdownOpen
+
+
+
+  }
+
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    if (this.dropdownOpen && !this.dropDownListRef.nativeElement.contains(target)) {
+    
+      this.dropdownOpen = false;
+      this.errorMsg = this.ddlconfigOptions.validators.function(this.selectedValues);
+      this.hasError = true;
+    }
+  } 
+
+
+  isSelected(option: any): any {
+    const value = typeof option === 'object' ? option[this.uniqueKey] : option;
+    const index = this.selectedValues.findIndex((selectedOption: any) => {
+      const selectedValue = typeof selectedOption === 'object' ? selectedOption[this.uniqueKey] : selectedOption;
+      return selectedValue === value;
+    });
+    return index !== -1
+  }
+
+  selectValues(option: any) {
+    const value = typeof option === 'object' ? option[this.uniqueKey] : option;
+    const optionIndex = this.selectedValues.findIndex((selectedOption: any) => {
+      const selectedValue = typeof selectedOption === 'object' ? selectedOption[this.uniqueKey] : selectedOption;
+      return selectedValue === value;
+    })
     if (optionIndex > -1) {
       this.selectedValues.splice(optionIndex, 1);
     } else {
@@ -64,94 +150,94 @@ console.log(this.ddlconfigOptions)
         this.selectedValues = [option];
       } else {
         this.selectedValues.push(option);
+
       }
     }
+    this.selectedValues = this.getUniqueArray(this.selectedValues);
 
     this.selectionEvent.emit(this.selectedValues);
-    console.log("selection result", this.selectedValues)
   }
+
+
+
+  getDefualtSelectedVals() {
+    const defaultValuesArray = this.getUniqueArray(this.defualtSelectedValues);
+
+    this.originalOptions = [...defaultValuesArray, ...this.options]
+    this.selectedValues = [...defaultValuesArray]
+
+
+  }
+
+
+
 
 
   displaySelectedVals() {
-    console.log("display selected vals", this.selectedValues)
-    if (typeof this.selectedValues[0] === 'string') {
-      return this.selectedValues.join(',') || 'Main Field'
-    } else {
-      return this.selectedValues.map(value => (value as Iitems).name).join(', ') || 'Main Field';
+    return this.selectedValues
+      .map((value: any) => {
+        const val = value[this.showKey] ? value[this.showKey] : value
+        return val;
+      })
+      .join(', ') || 'Main Field';
 
-    }
   }
 
-  getFilteredValues(): any {
-    if (this.searchQuery.trim() === '') {
-      console.log(this.originalOptions)
-      return this.originalOptions
+  searchValues() {
+    if (this.ddlconfigOptions.baseUrl) {
+      if (this.searchQuery.trim() === '') {
+        this.page = 1;
+        this.options = [];
+        this.loadItems();
+      } else {
+        this.page = 1;
+        this.options = [];
+        this.loadItems();
+      }
     } else {
       const query = this.searchQuery.toLowerCase()
-
-      if (typeof this.originalOptions[0] === 'string') {
-        return this.originalOptions.filter(option => (option as string).toLowerCase().includes(query));
-      } else {
-        return this.originalOptions.filter(optionName => (optionName as Iitems).name.toLowerCase().includes(query));
-      }
+      this.originalOptions = this.getUniqueArray(this.options).filter((option: any) => {
+        const showKey = option[this.showKey] ? option[this.showKey] : option;
+        const value = option[this.searchCode] ? option[this.searchCode] : showKey
+        return value.toString().toLowerCase().includes(query)
+      })
     }
   }
+
 
   selectAll() {
     if (this.ddlconfigOptions.isMultiValued) {
-      this.selectedValues = [...this.originalOptions]
-      this.selectionEvent.emit(this.selectedValues);
+      if (this.defualtSelectedValues.length > 0) {
+        const newArray = [...this.options, ...this.defualtSelectedValues]
+        this.selectedValues = [...this.getUniqueArray(newArray)]
+      } else {
+        this.selectedValues = [...this.getUniqueArray(this.originalOptions)]
+        this.selectionEvent.emit(this.selectedValues);
+      }
+
     }
   }
 
   reset() {
     this.selectedValues = []
+    this.originalOptions = this.getUniqueArray(this.options)
     this.searchQuery = ''
-    this.getFilteredValues()
   }
 
-  getOptionId(option: Iitems | string) {
-    return typeof option === 'string' ? option : option.id;
-
-  }
-  private getUniqueKey(option: Iitems | string) {
-    if (typeof option === 'string') {
-      return option;
-    } else {
-      const key = this.ddlconfigOptions.uniqueKey as keyof Iitems || 'id';
-      console.log("kkkkkkkkkk", key)
-      return option[key] || option.id;  // Fallback logic
-    }
-  }
-
-
-  getOptionName(option: Iitems | string) {
-    return typeof option === 'string' ? option : option.name;
-  }
-
-  private getUniqueArray(array: (string | Iitems)[]) {
-    if (array.length === 0) return [];
-
-    if (typeof array[0] === 'string') {
-      return array.filter((item, index, self) => self.indexOf(item) === index);
-    }
-
-    const uniqueMap = new Map<any, Iitems>();
-
+  private getUniqueArray(array: any): any[] {
+    const uniqueSet = new Set();
+    const uniqueArray: any[] = [];
     for (const item of array) {
-      if (typeof item === 'object' && item !== null) {
-        const uniqueKey = this.getUniqueKey(item);
-        console.log("uniqueKey from getuniqueArray",uniqueKey)
-        if (!uniqueMap.has(uniqueKey)) {
-          uniqueMap.set(uniqueKey, item);
-          console.log("unique mpapp" , uniqueMap)
-        }
+      const value = item[this.uniqueKey] ? item[this.uniqueKey] : item
+      if (!uniqueSet.has(value)) {
+        uniqueSet.add(value)
+        uniqueArray.push(item)
       }
     }
-
-    console.log("uniqueMap.values",uniqueMap.values())
-    return Array.from(uniqueMap.values());
-
+    return uniqueArray;
   }
+
+
+
 
 }
