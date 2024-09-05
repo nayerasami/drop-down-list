@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { DropDownListComponent } from './components/drop-down-list/drop-down-list.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MultiSelectComponent } from './components/multi-select/multi-select.component';
 import { ReusableDdlComponent } from './components/reusable-ddl/reusable-ddl.component';
 
@@ -17,7 +17,8 @@ import { ReusableDdlComponent } from './components/reusable-ddl/reusable-ddl.com
   imports: [
     BrowserModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

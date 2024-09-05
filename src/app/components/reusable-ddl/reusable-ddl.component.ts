@@ -1,4 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 import { ItemsService } from 'src/app/services/items.service';
 
@@ -8,7 +9,7 @@ import { ItemsService } from 'src/app/services/items.service';
   styleUrls: ['./reusable-ddl.component.css']
 })
 export class ReusableDdlComponent implements OnInit {
-  @ViewChild('dropDownList') dropDownListRef! :ElementRef<HTMLElement>
+  @ViewChild('dropDownList') dropDownListRef!: ElementRef<HTMLElement>
   selectedValues: any = [];
   searchQuery = ''
   uniqueKey: any;
@@ -19,6 +20,8 @@ export class ReusableDdlComponent implements OnInit {
   errorMsg: any;
   page: any;
   limit: any;
+  label: any;
+  defaultTitle: any;
   private currentPage: any
   private totalPagesNo: any;
   itemTotalNumber: any
@@ -35,7 +38,7 @@ export class ReusableDdlComponent implements OnInit {
   };
 
   @Input() defualtSelectedValues: any = []
-
+  formControl!: FormControl;
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
   @Output() loadMore = new EventEmitter()
@@ -51,7 +54,9 @@ export class ReusableDdlComponent implements OnInit {
     this.apiEndPoint = this.ddlconfigOptions.baseUrl
     this.page = this.ddlconfigOptions.page
     this.limit = this.ddlconfigOptions.limit;
-
+    this.options = this.ddlconfigOptions.optionsArr
+    this.label = this.ddlconfigOptions.label;
+    this.defaultTitle = this.ddlconfigOptions.defaultTitle
     if (this.ddlconfigOptions.baseUrl) {
       this.loadItems()
     } else {
@@ -59,6 +64,12 @@ export class ReusableDdlComponent implements OnInit {
     }
     this.getDefualtSelectedVals()
 
+
+    if (this.ddlconfigOptions.isMultiValued) {
+      this.formControl = new FormControl('', this.ddlconfigOptions.multiSelectValidators.validators);
+    } else {
+      this.formControl = new FormControl('', this.ddlconfigOptions.singleSelectValidators.validators);
+    }
 
   }
 
@@ -80,7 +91,7 @@ export class ReusableDdlComponent implements OnInit {
     })
   }
 
-  getSelectedValues(){return this.selectedValues}
+  getSelectedValues() { return this.selectedValues }
 
   setSelectItems(items: any) {
     this.selectedValues = items
@@ -118,14 +129,13 @@ export class ReusableDdlComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-
     if (this.dropdownOpen && !this.dropDownListRef.nativeElement.contains(target)) {
-    
+
       this.dropdownOpen = false;
-      this.errorMsg = this.ddlconfigOptions.validators.function(this.selectedValues);
-      this.hasError = true;
+      console.log(this.formControl)
+      this.hasError = this.formControl.invalid;
     }
-  } 
+  }
 
 
   isSelected(option: any): any {
@@ -154,7 +164,12 @@ export class ReusableDdlComponent implements OnInit {
       }
     }
     this.selectedValues = this.getUniqueArray(this.selectedValues);
-
+    this.formControl.setValue(this.selectedValues);
+    if (this.ddlconfigOptions.isMultiValued) {
+      this.formControl.setValidators(this.ddlconfigOptions.multiSelectValidators.validators)
+    } else {
+      this.formControl.setValidators(this.ddlconfigOptions.singleSelectValidators.validators)
+    }
     this.selectionEvent.emit(this.selectedValues);
   }
 
@@ -162,15 +177,11 @@ export class ReusableDdlComponent implements OnInit {
 
   getDefualtSelectedVals() {
     const defaultValuesArray = this.getUniqueArray(this.defualtSelectedValues);
-
     this.originalOptions = [...defaultValuesArray, ...this.options]
     this.selectedValues = [...defaultValuesArray]
 
 
   }
-
-
-
 
 
   displaySelectedVals() {
@@ -179,7 +190,7 @@ export class ReusableDdlComponent implements OnInit {
         const val = value[this.showKey] ? value[this.showKey] : value
         return val;
       })
-      .join(', ') || 'Main Field';
+      .join(', ') || this.defaultTitle;
 
   }
 
@@ -223,7 +234,6 @@ export class ReusableDdlComponent implements OnInit {
     this.originalOptions = this.getUniqueArray(this.options)
     this.searchQuery = ''
   }
-
   private getUniqueArray(array: any): any[] {
     const uniqueSet = new Set();
     const uniqueArray: any[] = [];

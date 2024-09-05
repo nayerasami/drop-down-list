@@ -1,7 +1,7 @@
 export interface IddlOptions {
     uniqueKey?: keyof any,
     isMultiValued ?:boolean,
-    isSearchabl?:boolean,
+    isSearchable?:boolean,
     isResettable?:boolean,
     // items:any[],
     showKey?:any,
@@ -10,11 +10,16 @@ export interface IddlOptions {
     limit?:number,
     page?:number
     validators? :any
-
+    optionsArr?:Iitems[],
+    label?:string,
+    name?:string,
+    defaultTitle?: string,
+    multiSelectValidators?:any
+    singleSelectValidators?:any
 }
 
 export interface Iitems {
 id:number,
-name:string
-
+title:string,
+code:string
 }

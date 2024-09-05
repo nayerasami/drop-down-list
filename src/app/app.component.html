@@ -11,21 +11,24 @@
 
 <div class="container">
   <div class="row">
-
     <div class="col-md-9">
       <app-reusable-ddl
-     
-      [inputType]="inputType"
-      (selectionEvent)="getSelectedData($event)"
-      [ddlconfigOptions]="ddlconfig"
-      [loading]="loading"
-    #dropList
-    ></app-reusable-ddl>
+        [inputType]="inputType"
+        (selectionEvent)="getSelectedData($event)"
+        [ddlconfigOptions]="ddlconfig"
+        [loading]="loading"
+        #dropList
+      ></app-reusable-ddl>
     </div>
 
     <div class="col-md-3 my-4">
-      <button class="btn btn-outline-success" #buttonSelect (click)="selectVal()"> Select </button>
+      <button
+        class="btn btn-outline-success"
+        #buttonSelect
+        (click)="selectVal()"
+      >
+        Select
+      </button>
     </div>
   </div>
-
 </div>
