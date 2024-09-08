@@ -10,25 +10,18 @@
 </div> -->
 
 <div class="container">
-  <div class="row">
-    <div class="col-md-9">
+  <div class="row" [formGroup]="formGroupName">
+    <div class="col-md-9" *ngFor="let ddl of DDLsOptions">
       <app-reusable-ddl
         [inputType]="inputType"
         (selectionEvent)="getSelectedData($event)"
-        [ddlconfigOptions]="ddlconfig"
+        [ddlOptions]="ddl"
         [loading]="loading"
         #dropList
+        [formControlName]="ddl.ddlconfigOptions.name || ''"
       ></app-reusable-ddl>
     </div>
-
-    <div class="col-md-3 my-4">
-      <button
-        class="btn btn-outline-success"
-        #buttonSelect
-        (click)="selectVal()"
-      >
-        Select
-      </button>
-    </div>
   </div>
+  
 </div>
+y

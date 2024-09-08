@@ -1,6 +1,5 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { IddlOptions, Iitems } from 'src/app/Models/iddl-options';
 import { ItemsService } from 'src/app/services/items.service';
 
 @Component({
@@ -29,32 +28,36 @@ export class ReusableDdlComponent implements OnInit {
   options: any = [];
   @Input() inputType: string = '';
   @Input() loading: boolean = false
-  @Input() ddlconfigOptions: IddlOptions = {
+  @Input() ddlOptions: any = {
     isMultiValued: false,
     // items: [],
     uniqueKey: 'id',
 
 
   };
+  ddlconfigOptions: any;
 
   @Input() defualtSelectedValues: any = []
   formControl!: FormControl;
   dropdownOpen = false;
   @Output() selectionEvent = new EventEmitter()
   @Output() loadMore = new EventEmitter()
+  @Input() formControlName: any;
 
+  @Input() formGroup: any
 
   constructor(private itemService: ItemsService) { }
 
   ngOnInit(): void {
-
+    console.log(this.formControlName, "form control name")
+    this.ddlconfigOptions = this.ddlOptions.ddlconfigOptions
     this.showKey = this.ddlconfigOptions.showKey || 'title';
     this.uniqueKey = this.ddlconfigOptions.uniqueKey || 'id'
     this.searchCode = this.ddlconfigOptions.searchKey || 'code'
     this.apiEndPoint = this.ddlconfigOptions.baseUrl
     this.page = this.ddlconfigOptions.page
     this.limit = this.ddlconfigOptions.limit;
-    this.options = this.ddlconfigOptions.optionsArr
+    this.options = this.ddlOptions.optionsArr
     this.label = this.ddlconfigOptions.label;
     this.defaultTitle = this.ddlconfigOptions.defaultTitle
     if (this.ddlconfigOptions.baseUrl) {
@@ -65,10 +68,12 @@ export class ReusableDdlComponent implements OnInit {
     this.getDefualtSelectedVals()
 
 
+
     if (this.ddlconfigOptions.isMultiValued) {
-      this.formControl = new FormControl('', this.ddlconfigOptions.multiSelectValidators.validators);
+      this.formControlName = new FormControl('', this.ddlconfigOptions.multiSelectValidators.validators);
     } else {
-      this.formControl = new FormControl('', this.ddlconfigOptions.singleSelectValidators.validators);
+
+      console.log(this.formGroup, "formGroup")
     }
 
   }
@@ -96,6 +101,8 @@ export class ReusableDdlComponent implements OnInit {
   setSelectItems(items: any) {
     this.selectedValues = items
   }
+
+
   onScroll(event: any) {
     if (this.ddlconfigOptions.baseUrl) {
       const element = event.target;
