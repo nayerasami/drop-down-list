@@ -14,11 +14,11 @@
 
     <div class="col-md-9">
       <app-reusable-ddl
-     
       [inputType]="inputType"
       (selectionEvent)="getSelectedData($event)"
       [ddlconfigOptions]="ddlconfig"
       [loading]="loading"
+      [options]="options"
     #dropList
     ></app-reusable-ddl>
     </div>

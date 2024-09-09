@@ -23,7 +23,7 @@ export class ReusableDdlComponent implements OnInit {
   private totalPagesNo: any;
   itemTotalNumber: any
   originalOptions: any = [];
-  options: any = [];
+  @Input() options: any = [];
   @Input() inputType: string = '';
   @Input() loading: boolean = false
   @Input() ddlconfigOptions: IddlOptions = {
@@ -161,11 +161,13 @@ export class ReusableDdlComponent implements OnInit {
 
 
   getDefualtSelectedVals() {
+  if(this.defualtSelectedValues){
     const defaultValuesArray = this.getUniqueArray(this.defualtSelectedValues);
 
-    this.originalOptions = [...defaultValuesArray, ...this.options]
+    this.originalOptions = this.getUniqueArray([...this.options, ...defaultValuesArray]);
     this.selectedValues = [...defaultValuesArray]
 
+  }
 
   }
 
@@ -179,7 +181,7 @@ export class ReusableDdlComponent implements OnInit {
         const val = value[this.showKey] ? value[this.showKey] : value
         return val;
       })
-      .join(', ') || 'Main Field';
+      .join(', ') || this.ddlconfigOptions.defaultValue || '';
 
   }
 
