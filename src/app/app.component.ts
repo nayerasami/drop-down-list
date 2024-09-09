@@ -19,10 +19,10 @@ export class AppComponent {
   //options: any[] = [];
   loading = false;
   validators: any;
-  // options: any[] = [
-  //   { id: 0, title: 'Computer Science', code: 'Cs' },
-  //   { id: 1, title: 'Design', code: 'DS' },
-  //   { id: 3, title: 'User Interface Designes', code: 'UI' },]
+  options: any[] = [
+    { id: 0, title: 'Computer Science', code: 'Cs' },
+    { id: 1, title: 'Design', code: 'DS' },
+    { id: 3, title: 'User Interface Designes', code: 'UI' }, { id: 3, title: 'User Interface Designes', code: 'UI' }, { id: 3, title: 'User Interface Designes', code: 'UI' }, { id: 3, title: 'User Interface Designes', code: 'UI' },]
 
   // options: any[] = [
   //   'Computer Science', 'Design', 'User Interface Designs', 'User Interface Designs', 'User Interface Designs', 'User Interface Designs'
@@ -30,25 +30,34 @@ export class AppComponent {
 
 
   ddlconfig: IddlOptions = {
-    isMultiValued: true,
-    isResettable: true,
-    isSearchabl: true,
+    isMultiValued: false,
+    isResettable: false,
+    isSearchable: false,
+    defaultValue:'MAIN FIELD',
     uniqueKey: 'id',
     showKey: 'title',
     searchKey: 'code',
-    baseUrl: 'http://localhost:4000/api/v1/items',
+    // baseUrl: 'http://localhost:4000/api/v1/items',
     limit: 10,
     page: 1,
     validators: {
       function: (array: any): any => {
-        if (array.length == 0) {
-          return 'this field is required'
-        } else if (array.length < 3) {
-          return 'you must select at least 3 options'
-        }else{
-          return undefined
+        if (this.ddlconfig.isMultiValued) {
+          if (array.length === 0) {
+            return 'This field is required';
+          } else if (array.length < 3) {
+            return 'You must select at least 3 options';
+          } else {
+            return undefined; 
+          }
+        } else {
+          if (!array || array.length === 0) {
+            return 'You must select an option';
+          } else {
+            return undefined;
+          }
         }
-
+      
       }
     }
   }
